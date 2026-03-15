@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>EPL Match Result Prediction</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
+      crossorigin="anonymous"
+    />
+    <style>
+      body {
+        background: radial-gradient(circle at top, #101935 0, #050816 55%, #02010a 100%);
+        min-height: 100vh;
+        color: #f8fafc;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem 1rem;
+      }
+
+      .card {
+        border-radius: 1.25rem;
+        border: 1px solid rgba(148, 163, 184, 0.3);
+        box-shadow: 0 24px 60px rgba(15, 23, 42, 0.8);
+        background: linear-gradient(145deg, rgba(15, 23, 42, 0.95), rgba(15, 23, 42, 0.85));
+      }
+
+      .badge-epl {
+        background: linear-gradient(135deg, #16a34a, #22c55e);
+        box-shadow: 0 0 25px rgba(34, 197, 94, 0.4);
+      }
+
+      .form-label {
+        font-weight: 500;
+        color: #cbd5f5;
+      }
+
+      /* ── input fields — always dark background, always light text ── */
+      .form-control {
+        background-color: rgba(15, 23, 42, 0.9) !important;
+        border-color: rgba(148, 163, 184, 0.4);
+        color: #e5e7eb !important;
+        box-shadow: none !important;
+      }
+
+      .form-control:focus {
+        background-color: rgba(15, 23, 42, 0.9) !important;
+        border-color: #0ea5e9;
+        color: #e5e7eb !important;
+        box-shadow: none !important;
+      }
+
+      /* fix browser autofill turning fields white */
+      .form-control:-webkit-autofill,
+      .form-control:-webkit-autofill:hover,
+      .form-control:-webkit-autofill:focus,
+      .form-control:-webkit-autofill:active {
+        -webkit-text-fill-color: #e5e7eb !important;
+        -webkit-box-shadow: 0 0 0px 1000px rgba(15, 23, 42, 0.9) inset !important;
+        transition: background-color 5000s ease-in-out 0s;
+        caret-color: #e5e7eb;
+      }
+
+      /* placeholder colour */
+      .form-control::placeholder {
+        color: rgba(255, 255, 255, 0.35);
+      }
+
+      .form-control.is-invalid {
+        border-color: #ef4444 !important;
+      }
+
+      .invalid-feedback {
+        color: #f87171;
+        font-size: 0.78rem;
+      }
+
+      .btn-predict {
+        background: linear-gradient(135deg, #0ea5e9, #6366f1);
+        border: none;
+        color: #fff;
+        box-shadow: 0 12px 30px rgba(56, 189, 248, 0.4);
+        transition: background 0.2s;
+      }
+
+      .btn-predict:hover {
+        background: linear-gradient(135deg, #0284c7, #4f46e5);
+        color: #fff;
+      }
+
+      .prediction-chip {
+        padding: 0.75rem 1.75rem;
+        border-radius: 999px;
+        font-size: 0.95rem;
+        letter-spacing: 0.08em;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.6rem;
+      }
+
+      .chip-win  { background: rgba(22,163,74,0.15);  border: 1px solid rgba(34,197,94,0.5);  color: #4ade80; }
+      .chip-draw { background: rgba(234,179,8,0.15);  border: 1px solid rgba(234,179,8,0.5);  color: #facc15; }
+      .chip-loss { background: rgba(220,38,38,0.15);  border: 1px solid rgba(239,68,68,0.5);  color: #f87171; }
+
+      .prediction-label {
+        font-weight: 700;
+        font-size: 1.1rem;
+        text-transform: uppercase;
+      }
+
+      .footer-text { font-size: 0.8rem; color: #9ca3af; }
+    </style>
+  </head>
+
+  <body>
+    <div class="container" style="max-width: 960px">
+      <div class="card p-4 p-md-5">
+
+        <div class="mb-4">
+          <span class="badge badge-epl rounded-pill text-white mb-2 px-3 py-2">EPL ANALYTICS</span>
+          <h1 class="h3 mb-1 text-white">Match Result Prediction</h1>
+          <p class="mb-0 text-secondary small">
+            Enter in-match statistics to predict whether the
+            <span class="fw-semibold text-light">home team</span> will win, draw, or lose.
+          </p>
+        </div>
+
+        {% if error_message %}
+        <div class="alert alert-danger py-2 small">{{ error_message }}</div>
+        {% endif %}
+
+        <form method="POST" novalidate id="predForm">
+          <div class="row g-3">
+
+            <div class="col-md-6">
+              <label for="HalfTimeHomeGoals" class="form-label">Half-Time Home Goals</label>
+              <input type="number" class="form-control" id="HalfTimeHomeGoals"
+                     name="HalfTimeHomeGoals" placeholder="e.g. 1" min="0" step="1" required />
+              <div class="invalid-feedback">Please enter a valid number (0 or more).</div>
+            </div>
+
+            <div class="col-md-6">
+              <label for="HalfTimeAwayGoals" class="form-label">Half-Time Away Goals</label>
+              <input type="number" class="form-control" id="HalfTimeAwayGoals"
+                     name="HalfTimeAwayGoals" placeholder="e.g. 0" min="0" step="1" required />
+              <div class="invalid-feedback">Please enter a valid number (0 or more).</div>
+            </div>
+
+            <div class="col-md-6">
+              <label for="HomeShotsOnTarget" class="form-label">Home Shots on Target</label>
+              <input type="number" class="form-control" id="HomeShotsOnTarget"
+                     name="HomeShotsOnTarget" placeholder="e.g. 6" min="0" step="1" required />
+              <div class="invalid-feedback" id="homeShotsErr">Please enter a valid number (0 or more).</div>
+            </div>
+
+            <div class="col-md-6">
+              <label for="AwayShotsOnTarget" class="form-label">Away Shots on Target</label>
+              <input type="number" class="form-control" id="AwayShotsOnTarget"
+                     name="AwayShotsOnTarget" placeholder="e.g. 3" min="0" step="1" required />
+              <div class="invalid-feedback" id="awayShotsErr">Please enter a valid number (0 or more).</div>
+            </div>
+
+            <div class="col-md-6">
+              <label for="HomeCorners" class="form-label">Home Corners</label>
+              <input type="number" class="form-control" id="HomeCorners"
+                     name="HomeCorners" placeholder="e.g. 5" min="0" step="1" required />
+              <div class="invalid-feedback">Please enter a valid number (0 or more).</div>
+            </div>
+
+            <div class="col-md-6">
+              <label for="AwayCorners" class="form-label">Away Corners</label>
+              <input type="number" class="form-control" id="AwayCorners"
+                     name="AwayCorners" placeholder="e.g. 4" min="0" step="1" required />
+              <div class="invalid-feedback">Please enter a valid number (0 or more).</div>
+            </div>
+
+          </div>
+
+          <div class="d-flex justify-content-between align-items-center mt-4 flex-wrap gap-3">
+            <button type="submit" class="btn btn-predict px-4 py-2 fw-semibold">
+              Predict Match Result
+            </button>
+
+            <div class="text-end">
+              {% if prediction == "WIN" %}
+                <div class="prediction-chip chip-win">
+                  <span class="small text-uppercase opacity-75">Predicted Result</span>
+                  <span class="prediction-label">WIN</span>
+                </div>
+              {% elif prediction == "DRAW" %}
+                <div class="prediction-chip chip-draw">
+                  <span class="small text-uppercase opacity-75">Predicted Result</span>
+                  <span class="prediction-label">DRAW</span>
+                </div>
+              {% elif prediction == "LOSS" %}
+                <div class="prediction-chip chip-loss">
+                  <span class="small text-uppercase opacity-75">Predicted Result</span>
+                  <span class="prediction-label">LOSS</span>
+                </div>
+              {% else %}
+                <span class="footer-text">Model: Support Vector Classifier (linear kernel)</span>
+              {% endif %}
+            </div>
+          </div>
+        </form>
+
+        <div class="mt-4 footer-text border-top border-secondary pt-3">
+          Inputs are from the <span class="fw-semibold text-light">home team's perspective</span>.
+          Prediction classes:
+          <span class="fw-semibold text-success">WIN</span>,
+          <span class="fw-semibold text-warning">DRAW</span>,
+          <span class="fw-semibold text-danger">LOSS</span>.
+        </div>
+
+      </div>
+    </div>
+
+    <script>
+      document.getElementById("predForm").addEventListener("submit", function (e) {
+        let valid = true;
+        const fields = ["HalfTimeHomeGoals","HalfTimeAwayGoals",
+                        "HomeShotsOnTarget","AwayShotsOnTarget",
+                        "HomeCorners","AwayCorners"];
+
+        fields.forEach(function(id) {
+          const el = document.getElementById(id);
+          el.classList.remove("is-invalid");
+          el.nextElementSibling.textContent = "Please enter a valid number (0 or more).";
+        });
+
+        fields.forEach(function(id) {
+          const val = document.getElementById(id).value;
+          if (val === "" || isNaN(parseInt(val)) || parseInt(val) < 0) {
+            document.getElementById(id).classList.add("is-invalid");
+            valid = false;
+          }
+        });
+
+        const htHome  = parseInt(document.getElementById("HalfTimeHomeGoals").value) || 0;
+        const htAway  = parseInt(document.getElementById("HalfTimeAwayGoals").value) || 0;
+        const homeSot = parseInt(document.getElementById("HomeShotsOnTarget").value);
+        const awaySot = parseInt(document.getElementById("AwayShotsOnTarget").value);
+
+        if (!isNaN(homeSot) && homeSot < htHome) {
+          const el = document.getElementById("HomeShotsOnTarget");
+          el.classList.add("is-invalid");
+          el.nextElementSibling.textContent =
+            "Home Shots on Target (" + homeSot + ") cannot be less than Home Goals (" + htHome + ").";
+          valid = false;
+        }
+
+        if (!isNaN(awaySot) && awaySot < htAway) {
+          const el = document.getElementById("AwayShotsOnTarget");
+          el.classList.add("is-invalid");
+          el.nextElementSibling.textContent =
+            "Away Shots on Target (" + awaySot + ") cannot be less than Away Goals (" + htAway + ").";
+          valid = false;
+        }
+
+        if (!valid) e.preventDefault();
+      });
+    </script>
+
+  </body>
+</html>
