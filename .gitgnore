@@ -1,0 +1,14 @@
+# Mac junk
+.DS_Store
+
+# Dataset
+epl_final 2.csv
+
+# Extra notebooks
+EPL_SVM_GridSearchCV_Tuning.ipynb
+
+# Generated files
+baseline_vs_tuned.png
+model-predictions-tuned.csv
+model-predictions.csv
+scaler.pkl
