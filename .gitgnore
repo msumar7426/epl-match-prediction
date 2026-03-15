@@ -1,9 +1,6 @@
 # Mac junk
 .DS_Store
 
-# Dataset
-epl_final 2.csv
-
 # Extra notebooks
 EPL_SVM_GridSearchCV_Tuning.ipynb
 
