@@ -1,12 +1,3 @@
----
-title: EPL Match Prediction
-emoji: ⚽
-colorFrom: green
-colorTo: gray
-sdk: docker
-pinned: false
----
-
 # EPL Match Result Prediction | AI Engine
 
 **Live Demo:** [https://huggingface.co/spaces/msumar2011/EPL_match_prediction](https://huggingface.co/spaces/msumar2011/EPL_match_prediction)
