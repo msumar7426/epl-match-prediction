@@ -1,46 +1,57 @@
-# EPL Match Result Prediction Web Application
+---
+title: EPL Match Prediction
+emoji: ⚽
+colorFrom: green
+colorTo: gray
+sdk: docker
+pinned: false
+---
 
-## Project Link: https://msumar.pythonanywhere.com/
+# EPL Match Result Prediction | AI Engine
+
+**Live Demo:** [https://huggingface.co/spaces/msumar2011/EPL_match_prediction](https://huggingface.co/spaces/msumar2011/EPL_match_prediction)
 
 ## Project Overview
-This project is a machine learning-powered web application designed to predict the outcome of English Premier League (EPL) matches from the perspective of the **Home Team**. The application takes in-match statistics at half-time (or later) and predicts whether the home team will **WIN**, **DRAW**, or **LOSE**.
+This project is an elite machine learning-powered web application designed to predict the outcome of English Premier League (EPL) matches from the perspective of the **Home Team**. The application takes in-match statistics at half-time (or later) and predicts whether the home team will **WIN**, **DRAW**, or **LOSE**.
 
-This repository contains both the model training pipeline (Jupyter Notebook) and the deployment-ready Flask web application.
+This repository contains both the model tuning pipeline (Jupyter Notebook) and a deployment-ready, highly optimized Flask web application featuring a premium "AI Sports Command Center" interface.
 
 ## Repository Structure
 
 ```text
-epl_webapp/
+epl_match_prediction/
 ├── README.md                                  # Project documentation (this file)
-├── EPL_Match_Result_Prediction (1).ipynb      # Jupyter Notebook with EDA and Model Training
+├── EPL_SVM_GridSearchCV_Tuning.ipynb          # Jupyter Notebook with EDA and Model Tuning
 ├── backend.py                                 # Flask application serving the model
 ├── requirements.txt                           # Python dependencies
-├── Trained Models/                            # Directory containing the saved ML model
-│   └── svc_trained_model.pkl                  # Pickled Support Vector Classifier model
+├── Dockerfile                                 # Docker configuration for Hugging Face deployment
+├── trained_models/                            # Directory containing the saved ML models
+│   ├── svc_tuned_model.pkl                    # Pickled tuned Support Vector Classifier model
+│   └── scaler.pkl                             # Pickled StandardScaler for feature normalization
 └── templates/                                 # Directory containing HTML templates
-    └── index.html                             # The front-end user interface
+    └── index.html                             # The premium AI Command Center UI
 ```
 
 ## Features
-- **Predictive Modeling**: Utilizes an extensively trained Support Vector Classifier (SVC) with a linear kernel to classify match outcomes.
-- **Interactive Web Interface**: A beautifully designed, responsive UI built with HTML, CSS (Bootstrap 5), and custom styling.
-- **Seamless Integration**: A lightweight Flask backend that efficiently loads the serialized model and processes form submissions to yield real-time predictions.
+- **Predictive Modeling**: Utilizes an extensively tuned Support Vector Classifier (SVC) with a linear kernel. User input is dynamically scaled using a fitted `StandardScaler` to ensure maximum prediction accuracy.
+- **Elite Visual Identity**: A beautifully designed, cinematic AI sports dashboard featuring matte black aesthetics, tactical grid overlays, and dynamic sports glow effects based on the match prediction.
+- **Seamless Integration**: A lightweight Flask backend that efficiently loads the serialized models and processes form submissions to yield real-time predictions.
 
 ## Machine Learning Model
-The classification model was built and evaluated using the provided Jupyter Notebook (`EPL_Match_Result_Prediction (1).ipynb`).
+The classification model was built and evaluated using the provided Jupyter Notebook (`EPL_SVM_GridSearchCV_Tuning.ipynb`).
 - **Features Used**: `HalfTimeHomeGoals`, `HalfTimeAwayGoals`, `HomeShotsOnTarget`, `AwayShotsOnTarget`, `HomeCorners`, `AwayCorners`.
 - **Target Variable**: `Result` (WIN, DRAW, LOSS for the Home Team).
-- **Algorithm**: Support Vector Machine (SVM) Classifier.
+- **Algorithm**: Support Vector Machine (SVM) Classifier mapped with robust feature scaling.
 
 ## Prerequisites
 To run this project locally, ensure you have Python 3 installed on your machine.
 
 ## Setup and Installation
 
-1. **Clone or Extract the Repository**
-   Ensure you are in the `epl_webapp` directory.
+1. **Clone the Repository**
+   Ensure you are in the project directory.
    ```bash
-   cd epl_webapp
+   cd epl_match_prediction
    ```
 
 2. **Create a Virtual Environment (Optional but Recommended)**
@@ -55,34 +66,27 @@ To run this project locally, ensure you have Python 3 installed on your machine.
    pip install -r requirements.txt
    ```
 
-## Running the Web Application
+## Running the Web Application Locally
 
 1. **Start the Flask Server**
-   Run the backend script to start the local development server:
+   Run the backend script to start the local development server (configured to port 5005 to avoid macOS port conflicts):
    ```bash
    python backend.py
-   ```
-   Alternatively, you can run:
-   ```bash
-   export FLASK_APP=backend:app  # On Windows CMD use: set FLASK_APP=backend:app
-   flask run
    ```
 
 2. **Access the Application**
    Open your preferred web browser and navigate to:
-   `http://127.0.0.1:5000/`
+   `http://127.0.0.1:5005/`
 
-## Usage
-1. Open the web interface.
-2. Input the match statistics for the both the Home and Away teams (Goals at Half Time, Shots on Target, and Corners).
-3. Click the **"Predict Match Result"** button.
-4. The predicted result (**WIN**, **DRAW**, or **LOSS**) will be displayed on the screen.
+## Deploying to Hugging Face Spaces
+
+This application is configured for seamless deployment to Hugging Face Spaces using the included `Dockerfile`.
+
+1. Create a new **Docker** Space on Hugging Face.
+2. Upload the `backend.py`, `requirements.txt`, `Dockerfile`, `templates/`, and `trained_models/` directly into your Hugging Face Space.
+3. Hugging Face will automatically build the Docker container and deploy the app.
 
 ## Technologies Used
-- **Backend / Machine Learning**: Python, Flask, Pandas, NumPy, Scikit-Learn
-- **Frontend**: HTML5, CSS3, Bootstrap 5
-- **Model Serialization**: Pickle
-
-## Developer / Submission Information
-- **Dataset**: Kaggle — English Premier League Results (2000–2022)
-- **Deployment**: Can be easily deployed to platforms like PythonAnywhere, Heroku, or Render using the included WSGI configuration.
+- **Backend / Machine Learning**: Python, Flask, Pandas, Scikit-Learn
+- **Frontend**: HTML5, CSS3 (Custom Elite UI), Google Fonts (Bebas Neue, Oswald, Inter)
+- **Deployment**: Docker, Gunicorn (Hugging Face Spaces)

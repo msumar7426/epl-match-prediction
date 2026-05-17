@@ -3,232 +3,518 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>EPL Match Result Prediction</title>
-    <link
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-      rel="stylesheet"
-      integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
-      crossorigin="anonymous"
-    />
+    <title>EPL Match Result Prediction | AI Engine</title>
+    
+    <!-- Fonts: Bebas Neue, Oswald, Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600;700&family=Oswald:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <style>
+      :root {
+        --bg-matte: #080808;
+        --bg-panel: #121212;
+        --bg-graphite: #1a1a1a;
+        --accent-neon-green: #39ff14;
+        --accent-stadium-green: #0b2e13;
+        --accent-gold: #d4af37;
+        --accent-crimson: #e60000;
+        --accent-draw: #7c7c7c;
+        --text-white: #ffffff;
+        --text-muted: #888888;
+        --border-dim: rgba(255, 255, 255, 0.08);
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
       body {
-        background: radial-gradient(circle at top, #101935 0, #050816 55%, #02010a 100%);
+        background-color: var(--bg-matte);
+        color: var(--text-white);
+        font-family: 'Inter', sans-serif;
         min-height: 100vh;
-        color: #f8fafc;
+        overflow-x: hidden;
+        /* Tactical Grid & Stadium Lighting */
+        background-image: 
+          radial-gradient(circle at 50% -10%, rgba(57, 255, 20, 0.15) 0%, transparent 40%),
+          linear-gradient(to bottom, rgba(8, 8, 8, 0.8), rgba(8, 8, 8, 1)),
+          linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+        background-size: 100% 100%, 100% 100%, 40px 40px, 40px 40px;
         display: flex;
         align-items: center;
         justify-content: center;
-        padding: 2rem 1rem;
+        padding: 3rem 1rem;
       }
 
-      .card {
-        border-radius: 1.25rem;
-        border: 1px solid rgba(148, 163, 184, 0.3);
-        box-shadow: 0 24px 60px rgba(15, 23, 42, 0.8);
-        background: linear-gradient(145deg, rgba(15, 23, 42, 0.95), rgba(15, 23, 42, 0.85));
+      /* Noise Overlay for texture */
+      .noise {
+        position: fixed;
+        top: 0; left: 0; width: 100%; height: 100%;
+        background: url('data:image/svg+xml,%3Csvg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"%3E%3Cfilter id="noiseFilter"%3E%3CfeTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" stitchTiles="stitch"/%3E%3C/filter%3E%3Crect width="100%25" height="100%25" filter="url(%23noiseFilter)"/%3E%3C/svg%3E');
+        opacity: 0.03;
+        pointer-events: none;
+        z-index: 999;
       }
 
-      .badge-epl {
-        background: linear-gradient(135deg, #16a34a, #22c55e);
-        box-shadow: 0 0 25px rgba(34, 197, 94, 0.4);
+      .container {
+        max-width: 1000px;
+        width: 100%;
+        position: relative;
+        z-index: 10;
       }
 
-      .form-label {
-        font-weight: 500;
-        color: #cbd5f5;
+      /* ── HEADER ── */
+      .header {
+        text-align: center;
+        margin-bottom: 3.5rem;
+        position: relative;
       }
 
-      /* ── input fields — always dark background, always light text ── */
-      .form-control {
-        background-color: rgba(15, 23, 42, 0.9) !important;
-        border-color: rgba(148, 163, 184, 0.4);
-        color: #e5e7eb !important;
-        box-shadow: none !important;
-      }
-
-      .form-control:focus {
-        background-color: rgba(15, 23, 42, 0.9) !important;
-        border-color: #0ea5e9;
-        color: #e5e7eb !important;
-        box-shadow: none !important;
-      }
-
-      /* fix browser autofill turning fields white */
-      .form-control:-webkit-autofill,
-      .form-control:-webkit-autofill:hover,
-      .form-control:-webkit-autofill:focus,
-      .form-control:-webkit-autofill:active {
-        -webkit-text-fill-color: #e5e7eb !important;
-        -webkit-box-shadow: 0 0 0px 1000px rgba(15, 23, 42, 0.9) inset !important;
-        transition: background-color 5000s ease-in-out 0s;
-        caret-color: #e5e7eb;
-      }
-
-      /* placeholder colour */
-      .form-control::placeholder {
-        color: rgba(255, 255, 255, 0.35);
-      }
-
-      .form-control.is-invalid {
-        border-color: #ef4444 !important;
-      }
-
-      .invalid-feedback {
-        color: #f87171;
-        font-size: 0.78rem;
-      }
-
-      .btn-predict {
-        background: linear-gradient(135deg, #0ea5e9, #6366f1);
-        border: none;
-        color: #fff;
-        box-shadow: 0 12px 30px rgba(56, 189, 248, 0.4);
-        transition: background 0.2s;
-      }
-
-      .btn-predict:hover {
-        background: linear-gradient(135deg, #0284c7, #4f46e5);
-        color: #fff;
-      }
-
-      .prediction-chip {
-        padding: 0.75rem 1.75rem;
-        border-radius: 999px;
-        font-size: 0.95rem;
-        letter-spacing: 0.08em;
+      .header-badge {
         display: inline-flex;
         align-items: center;
-        gap: 0.6rem;
+        gap: 0.5rem;
+        background: rgba(57, 255, 20, 0.05);
+        color: var(--accent-neon-green);
+        border: 1px solid rgba(57, 255, 20, 0.2);
+        padding: 0.4rem 1rem;
+        border-radius: 2px;
+        font-family: 'Oswald', sans-serif;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 0 20px rgba(57, 255, 20, 0.1);
+        backdrop-filter: blur(5px);
+      }
+      
+      .header-badge i {
+        font-size: 0.6rem;
       }
 
-      .chip-win  { background: rgba(22,163,74,0.15);  border: 1px solid rgba(34,197,94,0.5);  color: #4ade80; }
-      .chip-draw { background: rgba(234,179,8,0.15);  border: 1px solid rgba(234,179,8,0.5);  color: #facc15; }
-      .chip-loss { background: rgba(220,38,38,0.15);  border: 1px solid rgba(239,68,68,0.5);  color: #f87171; }
-
-      .prediction-label {
-        font-weight: 700;
-        font-size: 1.1rem;
+      .header h1 {
+        font-family: 'Bebas Neue', cursive;
+        font-size: 4.5rem;
+        line-height: 1;
+        letter-spacing: 2px;
+        text-shadow: 0 0 30px rgba(255,255,255,0.1);
+        margin-bottom: 0.5rem;
         text-transform: uppercase;
       }
 
-      .footer-text { font-size: 0.8rem; color: #9ca3af; }
+      .header p {
+        color: var(--text-muted);
+        font-size: 1.1rem;
+        font-weight: 300;
+      }
+
+      .header p span {
+        color: var(--text-white);
+        font-weight: 600;
+      }
+
+      /* ── COMMAND CENTER PANEL ── */
+      .panel {
+        background: rgba(18, 18, 18, 0.8);
+        border: 1px solid var(--border-dim);
+        border-top: 1px solid rgba(255, 255, 255, 0.15);
+        backdrop-filter: blur(20px);
+        box-shadow: 0 30px 60px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(255,255,255,0.05);
+        position: relative;
+        overflow: hidden;
+      }
+
+      /* Panel corners aesthetic */
+      .panel::before, .panel::after {
+        content: ''; position: absolute; top: 0; width: 20px; height: 2px; background: var(--accent-neon-green);
+      }
+      .panel::before { left: 0; }
+      .panel::after { right: 0; }
+
+      .panel-inner {
+        padding: 3rem;
+      }
+
+      .error-alert {
+        background: rgba(230, 0, 0, 0.1);
+        border-left: 4px solid var(--accent-crimson);
+        color: #ff4d4d;
+        padding: 1rem 1.5rem;
+        margin-bottom: 2rem;
+        font-family: 'Inter', sans-serif;
+        font-size: 0.9rem;
+        display: flex;
+        align-items: center;
+        gap: 0.8rem;
+      }
+
+      /* ── FORM GRID ── */
+      .form-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 2rem;
+        margin-bottom: 3rem;
+      }
+
+      .input-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        position: relative;
+      }
+
+      .input-group label {
+        font-family: 'Oswald', sans-serif;
+        text-transform: uppercase;
+        font-size: 0.85rem;
+        letter-spacing: 1px;
+        color: #aaaaaa;
+        display: flex;
+        justify-content: space-between;
+      }
+
+      .input-wrapper {
+        position: relative;
+      }
+
+      .input-wrapper::before {
+        content: '';
+        position: absolute;
+        left: 0; top: 0; bottom: 0;
+        width: 3px;
+        background: var(--border-dim);
+        transition: background 0.3s;
+      }
+
+      .form-control {
+        width: 100%;
+        background: rgba(0, 0, 0, 0.4);
+        border: 1px solid var(--border-dim);
+        border-left: none;
+        padding: 1rem 1rem 1rem 1.5rem;
+        color: var(--text-white);
+        font-family: 'Bebas Neue', cursive;
+        font-size: 1.5rem;
+        letter-spacing: 1px;
+        outline: none;
+        transition: all 0.3s ease;
+      }
+
+      .form-control::placeholder {
+        color: rgba(255, 255, 255, 0.15);
+        font-family: 'Inter', sans-serif;
+        font-size: 1rem;
+        letter-spacing: normal;
+        transform: translateY(-3px);
+        display: inline-block;
+      }
+
+      .form-control:focus {
+        background: rgba(255, 255, 255, 0.03);
+        border-color: rgba(255, 255, 255, 0.2);
+      }
+
+      .form-control:focus + .input-wrapper::before,
+      .input-group:focus-within .input-wrapper::before {
+        background: var(--accent-neon-green);
+        box-shadow: 0 0 10px var(--accent-neon-green);
+      }
+
+      /* Validation */
+      .form-control.is-invalid {
+        border-color: var(--accent-crimson);
+      }
+      .form-control.is-invalid + .input-wrapper::before,
+      .input-group:has(.is-invalid) .input-wrapper::before {
+        background: var(--accent-crimson) !important;
+        box-shadow: 0 0 10px var(--accent-crimson) !important;
+      }
+
+      .invalid-feedback {
+        color: var(--accent-crimson);
+        font-size: 0.75rem;
+        margin-top: 0.4rem;
+        display: none;
+      }
+      .form-control.is-invalid ~ .invalid-feedback {
+        display: block;
+        animation: fadeIn 0.3s ease;
+      }
+
+      /* ── FOOTER ACTIONS ── */
+      .action-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 2rem;
+        padding-top: 2rem;
+        border-top: 1px solid var(--border-dim);
+        flex-wrap: wrap;
+        gap: 2rem;
+      }
+
+      .btn-predict {
+        background: var(--text-white);
+        color: var(--bg-matte);
+        border: none;
+        padding: 1rem 2.5rem;
+        font-family: 'Oswald', sans-serif;
+        text-transform: uppercase;
+        font-size: 1rem;
+        letter-spacing: 2px;
+        font-weight: 700;
+        cursor: pointer;
+        position: relative;
+        overflow: hidden;
+        transition: all 0.3s;
+        display: flex;
+        align-items: center;
+        gap: 0.8rem;
+      }
+
+      .btn-predict::before {
+        content: '';
+        position: absolute;
+        top: 0; left: -100%; width: 100%; height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.8), transparent);
+        transition: left 0.5s;
+      }
+
+      .btn-predict:hover {
+        background: var(--accent-neon-green);
+        box-shadow: 0 0 20px rgba(57, 255, 20, 0.4);
+      }
+      
+      .btn-predict:hover::before {
+        left: 100%;
+      }
+
+      /* ── PREDICTION RESULTS ── */
+      .result-container {
+        text-align: right;
+      }
+
+      .prediction-box {
+        display: inline-flex;
+        flex-direction: column;
+        align-items: flex-end;
+        animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      }
+
+      .pred-subtitle {
+        font-family: 'Oswald', sans-serif;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        letter-spacing: 2px;
+        color: var(--text-muted);
+        margin-bottom: 0.3rem;
+      }
+
+      .pred-value {
+        font-family: 'Bebas Neue', cursive;
+        font-size: 4rem;
+        line-height: 0.8;
+        letter-spacing: 2px;
+        text-shadow: 0 10px 30px rgba(0,0,0,0.5);
+      }
+
+      /* Dynamic Prediction Styles */
+      .pred-WIN .pred-value {
+        color: var(--accent-neon-green);
+        text-shadow: 0 0 40px rgba(57, 255, 20, 0.3);
+      }
+      .pred-LOSS .pred-value {
+        color: var(--accent-crimson);
+        text-shadow: 0 0 40px rgba(230, 0, 0, 0.3);
+      }
+      .pred-DRAW .pred-value {
+        color: var(--accent-draw);
+        text-shadow: 0 0 40px rgba(255, 255, 255, 0.1);
+      }
+
+      .pred-model-info {
+        font-family: 'Inter', sans-serif;
+        font-size: 0.8rem;
+        color: #555;
+        margin-top: 1rem;
+      }
+
+      /* ── META INFO ── */
+      .meta-footer {
+        margin-top: 2rem;
+        text-align: center;
+        font-size: 0.8rem;
+        color: #555;
+        display: flex;
+        justify-content: center;
+        gap: 1.5rem;
+        font-family: 'Oswald', sans-serif;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+      }
+
+      .meta-footer span i {
+        margin-right: 0.4rem;
+      }
+
+      @keyframes slideUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+      @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+      }
+
+      @media (max-width: 768px) {
+        .header h1 { font-size: 3.5rem; }
+        .panel-inner { padding: 2rem; }
+        .action-row { flex-direction: column; align-items: stretch; text-align: center; }
+        .result-container { text-align: center; margin-top: 1rem; }
+        .prediction-box { align-items: center; }
+      }
     </style>
   </head>
 
   <body>
-    <div class="container" style="max-width: 960px">
-      <div class="card p-4 p-md-5">
-
-        <div class="mb-4">
-          <span class="badge badge-epl rounded-pill text-white mb-2 px-3 py-2">EPL ANALYTICS</span>
-          <h1 class="h3 mb-1 text-white">Match Result Prediction</h1>
-          <p class="mb-0 text-secondary small">
-            Enter in-match statistics to predict whether the
-            <span class="fw-semibold text-light">home team</span> will win, draw, or lose.
-          </p>
+    <div class="noise"></div>
+    
+    <div class="container">
+      
+      <header class="header">
+        <div class="header-badge">
+          <i class="fas fa-circle"></i> Live ML Engine
         </div>
+        <h1>English Premier League Match Prediction</h1>
+        <p>Enter tactical statistics from the <span>home team's perspective</span> to initialize prediction.</p>
+      </header>
 
-        {% if error_message %}
-        <div class="alert alert-danger py-2 small">{{ error_message }}</div>
-        {% endif %}
-
-        <form method="POST" novalidate id="predForm">
-          <div class="row g-3">
-
-            <div class="col-md-6">
-              <label for="HalfTimeHomeGoals" class="form-label">Half-Time Home Goals</label>
-              <input type="number" class="form-control" id="HalfTimeHomeGoals"
-                     name="HalfTimeHomeGoals" placeholder="e.g. 1" min="0" step="1" required />
-              <div class="invalid-feedback">Please enter a valid number (0 or more).</div>
-            </div>
-
-            <div class="col-md-6">
-              <label for="HalfTimeAwayGoals" class="form-label">Half-Time Away Goals</label>
-              <input type="number" class="form-control" id="HalfTimeAwayGoals"
-                     name="HalfTimeAwayGoals" placeholder="e.g. 0" min="0" step="1" required />
-              <div class="invalid-feedback">Please enter a valid number (0 or more).</div>
-            </div>
-
-            <div class="col-md-6">
-              <label for="HomeShotsOnTarget" class="form-label">Home Shots on Target</label>
-              <input type="number" class="form-control" id="HomeShotsOnTarget"
-                     name="HomeShotsOnTarget" placeholder="e.g. 6" min="0" step="1" required />
-              <div class="invalid-feedback" id="homeShotsErr">Please enter a valid number (0 or more).</div>
-            </div>
-
-            <div class="col-md-6">
-              <label for="AwayShotsOnTarget" class="form-label">Away Shots on Target</label>
-              <input type="number" class="form-control" id="AwayShotsOnTarget"
-                     name="AwayShotsOnTarget" placeholder="e.g. 3" min="0" step="1" required />
-              <div class="invalid-feedback" id="awayShotsErr">Please enter a valid number (0 or more).</div>
-            </div>
-
-            <div class="col-md-6">
-              <label for="HomeCorners" class="form-label">Home Corners</label>
-              <input type="number" class="form-control" id="HomeCorners"
-                     name="HomeCorners" placeholder="e.g. 5" min="0" step="1" required />
-              <div class="invalid-feedback">Please enter a valid number (0 or more).</div>
-            </div>
-
-            <div class="col-md-6">
-              <label for="AwayCorners" class="form-label">Away Corners</label>
-              <input type="number" class="form-control" id="AwayCorners"
-                     name="AwayCorners" placeholder="e.g. 4" min="0" step="1" required />
-              <div class="invalid-feedback">Please enter a valid number (0 or more).</div>
-            </div>
-
+      <div class="panel">
+        <div class="panel-inner">
+          
+          {% if error_message %}
+          <div class="error-alert">
+            <i class="fas fa-exclamation-triangle"></i>
+            <div>{{ error_message }}</div>
           </div>
+          {% endif %}
 
-          <div class="d-flex justify-content-between align-items-center mt-4 flex-wrap gap-3">
-            <button type="submit" class="btn btn-predict px-4 py-2 fw-semibold">
-              Predict Match Result
-            </button>
+          <form method="POST" novalidate id="predForm">
+            <div class="form-grid">
+              
+              <div class="input-group">
+                <label for="HalfTimeHomeGoals">Home Goals (HT) <i class="fas fa-futbol"></i></label>
+                <div class="input-wrapper">
+                  <input type="number" class="form-control" id="HalfTimeHomeGoals" name="HalfTimeHomeGoals" placeholder="e.g. 1" min="0" step="1" required />
+                </div>
+                <div class="invalid-feedback">Invalid data sequence. Requires ≥ 0.</div>
+              </div>
 
-            <div class="text-end">
-              {% if prediction == "WIN" %}
-                <div class="prediction-chip chip-win">
-                  <span class="small text-uppercase opacity-75">Predicted Result</span>
-                  <span class="prediction-label">WIN</span>
+              <div class="input-group">
+                <label for="HalfTimeAwayGoals">Away Goals (HT) <i class="fas fa-futbol" style="opacity:0.5"></i></label>
+                <div class="input-wrapper">
+                  <input type="number" class="form-control" id="HalfTimeAwayGoals" name="HalfTimeAwayGoals" placeholder="e.g. 0" min="0" step="1" required />
                 </div>
-              {% elif prediction == "DRAW" %}
-                <div class="prediction-chip chip-draw">
-                  <span class="small text-uppercase opacity-75">Predicted Result</span>
-                  <span class="prediction-label">DRAW</span>
+                <div class="invalid-feedback">Invalid data sequence. Requires ≥ 0.</div>
+              </div>
+
+              <div class="input-group">
+                <label for="HomeShotsOnTarget">Home Shots on Target <i class="fas fa-crosshairs"></i></label>
+                <div class="input-wrapper">
+                  <input type="number" class="form-control" id="HomeShotsOnTarget" name="HomeShotsOnTarget" placeholder="e.g. 6" min="0" step="1" required />
                 </div>
-              {% elif prediction == "LOSS" %}
-                <div class="prediction-chip chip-loss">
-                  <span class="small text-uppercase opacity-75">Predicted Result</span>
-                  <span class="prediction-label">LOSS</span>
+                <div class="invalid-feedback" id="homeShotsErr">Invalid data sequence. Requires ≥ 0.</div>
+              </div>
+
+              <div class="input-group">
+                <label for="AwayShotsOnTarget">Away Shots on Target <i class="fas fa-crosshairs" style="opacity:0.5"></i></label>
+                <div class="input-wrapper">
+                  <input type="number" class="form-control" id="AwayShotsOnTarget" name="AwayShotsOnTarget" placeholder="e.g. 3" min="0" step="1" required />
                 </div>
-              {% else %}
-                <span class="footer-text">Model: Support Vector Classifier (linear kernel)</span>
-              {% endif %}
+                <div class="invalid-feedback" id="awayShotsErr">Invalid data sequence. Requires ≥ 0.</div>
+              </div>
+
+              <div class="input-group">
+                <label for="HomeCorners">Home Corners <i class="fas fa-flag"></i></label>
+                <div class="input-wrapper">
+                  <input type="number" class="form-control" id="HomeCorners" name="HomeCorners" placeholder="e.g. 5" min="0" step="1" required />
+                </div>
+                <div class="invalid-feedback">Invalid data sequence. Requires ≥ 0.</div>
+              </div>
+
+              <div class="input-group">
+                <label for="AwayCorners">Away Corners <i class="fas fa-flag" style="opacity:0.5"></i></label>
+                <div class="input-wrapper">
+                  <input type="number" class="form-control" id="AwayCorners" name="AwayCorners" placeholder="e.g. 4" min="0" step="1" required />
+                </div>
+                <div class="invalid-feedback">Invalid data sequence. Requires ≥ 0.</div>
+              </div>
+
             </div>
-          </div>
-        </form>
 
-        <div class="mt-4 footer-text border-top border-secondary pt-3">
-          Inputs are from the <span class="fw-semibold text-light">home team's perspective</span>.
-          Prediction classes:
-          <span class="fw-semibold text-success">WIN</span>,
-          <span class="fw-semibold text-warning">DRAW</span>,
-          <span class="fw-semibold text-danger">LOSS</span>.
+            <div class="action-row">
+              <button type="submit" class="btn-predict">
+                <i class="fas fa-bolt"></i> Execute Prediction
+              </button>
+
+              <div class="result-container">
+                {% if prediction == "WIN" %}
+                  <div class="prediction-box pred-WIN">
+                    <span class="pred-subtitle">Calculated Outcome</span>
+                    <span class="pred-value">WIN</span>
+                  </div>
+                {% elif prediction == "DRAW" %}
+                  <div class="prediction-box pred-DRAW">
+                    <span class="pred-subtitle">Calculated Outcome</span>
+                    <span class="pred-value">DRAW</span>
+                  </div>
+                {% elif prediction == "LOSS" %}
+                  <div class="prediction-box pred-LOSS">
+                    <span class="pred-subtitle">Calculated Outcome</span>
+                    <span class="pred-value">LOSS</span>
+                  </div>
+                {% else %}
+                  <div class="pred-model-info">
+                    <i class="fas fa-microchip"></i> Engine: Support Vector Classifier
+                  </div>
+                {% endif %}
+              </div>
+            </div>
+          </form>
+
         </div>
-
       </div>
+
+      <div class="meta-footer">
+        <span><i class="fas fa-shield-alt"></i> Model Accuracy Optimized</span>
+        <span><i class="fas fa-database"></i> EPL Dataset Active</span>
+      </div>
+
     </div>
 
     <script>
+      // LOGIC REMAINS COMPLETELY UNCHANGED
       document.getElementById("predForm").addEventListener("submit", function (e) {
         let valid = true;
-        const fields = ["HalfTimeHomeGoals","HalfTimeAwayGoals",
-                        "HomeShotsOnTarget","AwayShotsOnTarget",
-                        "HomeCorners","AwayCorners"];
+        const fields = [
+          "HalfTimeHomeGoals", "HalfTimeAwayGoals",
+          "HomeShotsOnTarget", "AwayShotsOnTarget",
+          "HomeCorners", "AwayCorners"
+        ];
 
         fields.forEach(function(id) {
           const el = document.getElementById(id);
           el.classList.remove("is-invalid");
-          el.nextElementSibling.textContent = "Please enter a valid number (0 or more).";
+          // Finding the invalid-feedback div visually placed after the input wrapper
+          let feedback = el.parentElement.nextElementSibling;
+          feedback.textContent = "Invalid data sequence. Requires ≥ 0.";
         });
 
         fields.forEach(function(id) {
@@ -247,22 +533,21 @@
         if (!isNaN(homeSot) && homeSot < htHome) {
           const el = document.getElementById("HomeShotsOnTarget");
           el.classList.add("is-invalid");
-          el.nextElementSibling.textContent =
-            "Home Shots on Target (" + homeSot + ") cannot be less than Home Goals (" + htHome + ").";
+          let feedback = el.parentElement.nextElementSibling;
+          feedback.textContent = "Shots on target (" + homeSot + ") < Goals (" + htHome + ").";
           valid = false;
         }
 
         if (!isNaN(awaySot) && awaySot < htAway) {
           const el = document.getElementById("AwayShotsOnTarget");
           el.classList.add("is-invalid");
-          el.nextElementSibling.textContent =
-            "Away Shots on Target (" + awaySot + ") cannot be less than Away Goals (" + htAway + ").";
+          let feedback = el.parentElement.nextElementSibling;
+          feedback.textContent = "Shots on target (" + awaySot + ") < Goals (" + htAway + ").";
           valid = false;
         }
 
         if (!valid) e.preventDefault();
       });
     </script>
-
   </body>
 </html>

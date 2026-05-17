@@ -1,7 +1,6 @@
 import os
 import pickle
 
-import numpy as np
 import pandas as pd
 from flask import Flask, render_template, request
 
@@ -15,18 +14,21 @@ app = Flask(__name__)
 # so the path below will always be correct regardless of where you deploy.
 # ---------------------------------------------------------------------------
 BASE_DIR   = os.path.dirname(os.path.abspath(__file__))
-MODEL_PATH = os.path.join(BASE_DIR, "trained_models", "svc_trained_model.pkl")
+MODEL_PATH = os.path.join(BASE_DIR, "trained_models", "svc_tuned_model.pkl")
+SCALER_PATH = os.path.join(BASE_DIR, "trained_models", "scaler.pkl")
 
 
-def load_model():
-    """Load the trained SVC model from disk."""
+def load_assets():
+    """Load the trained SVC model and scaler from disk."""
     with open(MODEL_PATH, "rb") as f:
         model_obj = pickle.load(f)
-    return model_obj
+    with open(SCALER_PATH, "rb") as f:
+        scaler_obj = pickle.load(f)
+    return model_obj, scaler_obj
 
 
-# Load model once at startup for efficiency
-model = load_model()
+# Load model and scaler once at startup for efficiency
+model, scaler = load_assets()
 
 
 # ---------------------------------------------------------------------------
@@ -68,8 +70,11 @@ def index():
                 }
             )
 
-            # Make prediction using the loaded model
-            encoded_pred     = model.predict(user_input)[0]
+            # Scale the features
+            user_input_scaled = scaler.transform(user_input)
+
+            # Make prediction using the loaded tuned model
+            encoded_pred     = model.predict(user_input_scaled)[0]
             encoded_pred_int = int(encoded_pred)
             prediction       = LABEL_MAP.get(encoded_pred_int, "UNKNOWN")
 
@@ -82,4 +87,4 @@ def index():
 if __name__ == "__main__":
     # For local testing only.
     # On PythonAnywhere the WSGI config imports 'app' from this module directly.
-    app.run(debug=True)
+    app.run(debug=True, port=5005)
